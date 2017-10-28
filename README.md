@@ -5,7 +5,10 @@
   <br>
 </p>
 
-### Issue/Feedback:
+## Description:
+
+
+## Issue/Feedback:
 
 log them in the [github issues](https://github.com/cg-cnu/blender-image-manager/issues) or hit me on [twitter](https://twitter.com/cgcnu).
 
@@ -13,6 +16,6 @@ log them in the [github issues](https://github.com/cg-cnu/blender-image-manager/
 
 * [Blender Campus](https://www.youtube.com/watch?time_continue=81&v=cnz02CCRThQ)
 
-### Like it?:
+## Like it?:
 
 Please ⭐ this repo.
