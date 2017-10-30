@@ -9,11 +9,14 @@ bl_info = {
 }
 
 import bpy
+import os
 import subprocess
 
 # IDEA: logged by admin @ 2017-10-28 14:53:07
 # show the list of images on the right ?
 # change the tool name to image viewer
+
+# filter images 
 
 # metadata: a new panel to show meta of the current image
 # class Image_Manager_Metadata(bpy.types.Panel):
@@ -33,7 +36,7 @@ class Image_Manager_Panel(bpy.types.Panel):
     def draw(self, context):
         layout = self.layout
         column = layout.column(True)
-
+        
         # open
         row = column.row(True)
         row.prop(context.scene,
@@ -197,6 +200,11 @@ class IM_Copy_Image_Path(bpy.types.Operator):
 
         return {'FINISHED'}
 
+def get_images(path):
+    """ get all the images in the given path
+    """
+    return [ img for img in os.listdir(path) if img.endswith('.png') ]
+
 
 class IM_Change_Image(bpy.types.Operator):
     """ next image
@@ -207,6 +215,22 @@ class IM_Change_Image(bpy.types.Operator):
     direction = bpy.props.StringProperty()
 
     def execute(self, context):
+        # get the folder path
+        root_path = bpy.context.scene.IM_folder_path
+        # get all the images
+        images = get_images(root_path)
+        # find the next image in the array
+        # get current image
+        # dont' load if the image is already loaded
+         
+        new_image = bpy.data.images.load(os.path.join(root_path, images[0]),
+                        check_existing=True) 
+        
+        # set image after loading...
+        for area in bpy.context.screen.areas :
+            if area.type == 'IMAGE_EDITOR' :
+                    area.spaces.active.image = new_image
+        # set that image as the current image
         self.report({'INFO'}, '{0} Image'.format(self.direction))
         return {'FINISHED'}
 
@@ -239,7 +263,9 @@ class IM_Rotate_Image(bpy.types.Operator):
 
 def register():
     bpy.utils.register_class(Image_Manager_Panel)
-
+    # FIXME: noticed by admin @ 2017-10-30 14:03:20
+    #  change the input to aboslute path on load 
+    # bpy.path.abspath(path)
     bpy.types.Scene.IM_folder_path = bpy.props.StringProperty(
         name="",
         default="",
