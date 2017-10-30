@@ -13,17 +13,14 @@ import subprocess
 
 # IDEA: logged by admin @ 2017-10-28 14:53:07
 # show the list of images on the right ?
+# change the tool name to image viewer
 
-# Change background color to black ?
-
-# open with
-# multiple items ? 
-
-# metadata
+# metadata: a new panel to show meta of the current image
 # class Image_Manager_Metadata(bpy.types.Panel):
 # 	"""
 # 	show image metadata
 # 	"""
+
 
 class Image_Manager_Panel(bpy.types.Panel):
     """
@@ -39,99 +36,117 @@ class Image_Manager_Panel(bpy.types.Panel):
 
         # open
         row = column.row(True)
-        row.prop(context.scene, 
-                'IM_folder_path')
+        row.prop(context.scene,
+                 'IM_folder_path')
 
         # move
         row = column.row(True)
-        op = row.operator("scene.im_change_image", 
-                text="", 
-                icon="TRIA_LEFT").direction = 'left'
+        op = row.operator("scene.im_change_image",
+                          text="",
+                          icon="TRIA_LEFT").direction = 'left'
 
-        op = row.operator("scene.im_change_image", 
-                text="", 
-                icon="TRIA_RIGHT").direction = 'right'
+        op = row.operator("scene.im_change_image",
+                          text="",
+                          icon="TRIA_RIGHT").direction = 'right'
 
         # rotate
         row = column.row(True)
-        op = row.operator("scene.im_rotate_image", 
-                text="L",
-                icon="TRIA_LEFT").rotate_value = "rotate left"
+        op = row.operator("scene.im_rotate_image",
+                          text="L",
+                          icon="TRIA_LEFT").rotate_value = "rotate left"
 
-        op = row.operator("scene.im_rotate_image", 
-                text='R',
-                icon="TRIA_RIGHT").rotate_value = "rotate right"
+        op = row.operator("scene.im_rotate_image",
+                          text='R',
+                          icon="TRIA_RIGHT").rotate_value = "rotate right"
 
         # flip
         row = column.row(True)
-    
-        op = row.operator("scene.im_flip_image", 
-                text='H',
-                icon="TRIA_LEFT").flip_value = "flip left"
 
         op = row.operator("scene.im_flip_image",
-                text='V',
-                icon="TRIA_RIGHT").flip_value = "flip right"
+                          text='H',
+                          icon="TRIA_LEFT").flip_value = "flip left"
+
+        op = row.operator("scene.im_flip_image",
+                          text='V',
+                          icon="TRIA_RIGHT").flip_value = "flip right"
 
         # view
         row = column.row(True)
-        row.operator("image.view_all", 
-                text="Fit").fit_view = True
+        row.operator("image.view_all",
+                     text="Fit").fit_view = True
         row.operator("image.view_zoom_ratio",
-                text="All")
-        row.operator("image.view_zoom_ratio", 
-                text="Actual").ratio = 1
+                     text="All")
+        row.operator("image.view_zoom_ratio",
+                     text="Actual").ratio = 1
 
         # zoom
         row = column.row(True)
-        row.operator("image.view_zoom_out", 
-                text="", 
-                icon="ZOOM_OUT")
-        row.operator("image.view_zoom_in", 
-                text="", 
-                icon="ZOOM_IN")
-        
+        row.operator("image.view_zoom_out",
+                     text="",
+                     icon="ZOOM_OUT")
+        row.operator("image.view_zoom_in",
+                     text="",
+                     icon="ZOOM_IN")
+
         # reload image
         row = column.row(True)
-        row.operator("image.reload", 
-                text="", 
-                icon="FILE_REFRESH")
-        
+        row.operator("image.reload",
+                     text="",
+                     icon="FILE_REFRESH")
+
         # save/saveas
         row = column.row(True)
-        row.operator('image.save', 
-                text="save", 
-                icon="SAVE_AS")
-        row.operator('image.save', 
-                text="save all", 
-                icon="SAVE_AS")
-        row.operator('image.save_as', 
-                text="save as", 
-                icon="SAVE_AS")
-        
+        row.operator('image.save',
+                     text="save",
+                     icon="SAVE_AS")
+        row.operator('image.save',
+                     text="save all",
+                     icon="SAVE_AS")
+        row.operator('image.save_as',
+                     text="save as",
+                     icon="SAVE_AS")
+
         # copy path
         row = column.row(True)
-        row.operator('scene.im_copy_image_path', 
-                text="Copy Path")
+        row.operator('scene.im_copy_image_path',
+                     text="Copy Path")
 
         # slide show
         row = column.row(True)
-        row.prop( context.scene, 
-                'im_slide_show_speed',
-                text="speed")
-        row.operator('scene.im_slide_show', 
-                text="",
-                icon="PLAY")
-        
+        row.prop(context.scene,
+                 'im_slide_show_speed',
+                 text="speed")
+        row.operator('scene.im_slide_show',
+                     text="",
+                     icon="PLAY")
+
         # background color
         row = column.row(True)
-        row.prop( context.user_preferences.themes[0].image_editor.space,
-                "back",
-                text="bg color")
+        row.prop(context.user_preferences.themes[0].image_editor.space,
+                 "back",
+                 text="bg color")
         # TODO: created by admin @ 2017-10-30 12:25:16
         # reset the value to the theme default
 
- 
+        row = column.row(True)
+        row.operator('scene.im_open_image_external',
+                     text="open in ps",
+                     icon="OPEN_RECENT").app = 'ps'
+
+
+class IM_Open_Image_External(bpy.types.Operator):
+    """ Open image in external
+    """
+    bl_idname = "scene.im_open_image_external"
+    bl_label = "open image external"
+    bl_options = {'REGISTER', 'UNDO'}
+    app = bpy.props.StringProperty()
+
+    def execute(self, context):
+        self.report({'INFO'}, 'Open in {}'.format(self.app))
+        return {'FINISHED'}
+
+
 # TODO: created by admin @ 2017-10-28 17:42:07
 # change the icon on click ; its a toggle
 class IM_Slide_Show(bpy.types.Operator):
@@ -142,7 +157,7 @@ class IM_Slide_Show(bpy.types.Operator):
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
-        # IM_slide_show_speed 
+        # IM_slide_show_speed
         # for every n seconds go to next image
 
         self.report({'INFO'}, 'Slide show started')
@@ -227,8 +242,9 @@ def register():
 
     bpy.types.Scene.IM_folder_path = bpy.props.StringProperty(
         name="",
-        description="Folder path",
-        default="")
+        default="",
+        description="Folder path to load images",
+        subtype='DIR_PATH')
 
     bpy.types.Scene.im_slide_show_speed = bpy.props.IntProperty(
         name="",
@@ -240,6 +256,7 @@ def register():
     bpy.utils.register_class(IM_Rotate_Image)
     bpy.utils.register_class(IM_Copy_Image_Path)
     bpy.utils.register_class(IM_Slide_Show)
+    bpy.utils.register_class(IM_Open_Image_External)
 
 
 def unregister():
@@ -253,6 +270,7 @@ def unregister():
     bpy.utils.unregister_class(IM_Rotate_Image)
     bpy.utils.unregister_class(IM_Copy_Image_Path)
     bpy.utils.unregister_class(IM_Slide_Show)
+    bpy.utils.unregister_class(IM_Open_Image_External)
 
 
 if __name__ == "__main__":
