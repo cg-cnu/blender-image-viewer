@@ -39,64 +39,89 @@ class Image_Manager_Panel(bpy.types.Panel):
 
 		# open
 		row = column.row(True)
-		row.prop(context.scene, 'IM_folder_path')
-		row = column.row(True)
-		row.label('Image Manager')
+		row.prop(context.scene, 
+				'IM_folder_path')
 
 		# move
 		row = column.row(True)
-		row.label('Load:')
-		op = row.operator("scene.im_change_image", '<')
-		op.direction = 'left'
+		op = row.operator("scene.im_change_image", 
+				text="", 
+				icon="TRIA_LEFT").direction = 'left'
 
-		op = row.operator("scene.im_change_image", '>')
-		op.direction = 'right'
+		op = row.operator("scene.im_change_image", 
+				text="", 
+				icon="TRIA_RIGHT").direction = 'right'
 
 		# rotate
 		row = column.row(True)
-		row.label('Rotate:')
+		op = row.operator("scene.im_rotate_image", 
+				text="L",
+				icon="TRIA_LEFT").rotate_value = "rotate left"
 
-		op = row.operator("scene.im_rotate_image", 'L')
-		op.rotate_value = "90"
-
-		op = row.operator("scene.im_rotate_image", 'R')
-		op.rotate_value = "-90"
+		op = row.operator("scene.im_rotate_image", 
+				text='R',
+				icon="TRIA_RIGHT").rotate_value = "rotate right"
 
 		# flip
 		row = column.row(True)
-		row.label('Flip:')
+	
+		op = row.operator("scene.im_flip_image", 
+				text='H',
+				icon="TRIA_LEFT").flip_value = "flip left"
 
-		op = row.operator("scene.im_flip_image", 'H')
-		op.flip_value = "90"
-
-		op = row.operator("scene.im_flip_image", 'V')
-		op.flip_value = "-90"
+		op = row.operator("scene.im_flip_image",
+				text='V',
+				icon="TRIA_RIGHT").flip_value = "flip right"
 
 		# view
 		row = column.row(True)
-		row.operator("image.view_all", text="Fit").fit_view = True
-		row.operator("image.view_zoom_ratio", text="All")
-		row.operator("image.view_zoom_ratio", text="Actual").ratio = 1
+		row.operator("image.view_all", 
+				text="Fit").fit_view = True
+		row.operator("image.view_zoom_ratio",
+				text="All")
+		row.operator("image.view_zoom_ratio", 
+				text="Actual").ratio = 1
+
 		# zoom
 		row = column.row(True)
-		row.operator("image.view_zoom_out", text="", icon="ZOOM_OUT")
-		row.operator("image.view_zoom_in", text="", icon="ZOOM_IN")
+		row.operator("image.view_zoom_out", 
+				text="", 
+				icon="ZOOM_OUT")
+		row.operator("image.view_zoom_in", 
+				text="", 
+				icon="ZOOM_IN")
+		
 		# reload image
 		row = column.row(True)
-		row.operator("image.reload", text="", icon="FILE_REFRESH")
+		row.operator("image.reload", 
+				text="", 
+				icon="FILE_REFRESH")
+		
 		# save/saveas
 		row = column.row(True)
-		row.operator('image.save', text="save", icon="SAVE_AS")
-		row.operator('image.save', text="save all", icon="SAVE_AS")
-		row.operator('image.save_as', text="save as", icon="SAVE_AS")
+		row.operator('image.save', 
+				text="save", 
+				icon="SAVE_AS")
+		row.operator('image.save', 
+				text="save all", 
+				icon="SAVE_AS")
+		row.operator('image.save_as', 
+				text="save as", 
+				icon="SAVE_AS")
+		
 		# copy path
 		row = column.row(True)
-		row.operator('scene.im_copy_image_path', "Copy Path")
+		row.operator('scene.im_copy_image_path', 
+				text="Copy Path")
 
 		# slide show
 		row = column.row(True)
-		row.operator('scene.im_slide_show', "Slide Show")
-
+		row.prop( context.scene, 
+				'im_slide_show_speed',
+				text="speed")
+		row.operator('scene.im_slide_show', 
+				text="", 
+				icon="PLAY")
 
 # TODO: created by admin @ 2017-10-28 17:42:07
 # change the icon on click ; its a toggle
@@ -153,7 +178,7 @@ class IM_Change_Image(bpy.types.Operator):
 	""" next image
 	"""
 	bl_idname = "scene.im_change_image"
-	bl_label = "Next image"
+	bl_label = "change current image"
 	bl_options = {'REGISTER', 'UNDO'}
 	direction = bpy.props.StringProperty()
 
@@ -179,7 +204,7 @@ class IM_Rotate_Image(bpy.types.Operator):
 	""" Flip Image
 	"""
 	bl_idname = "scene.im_rotate_image"
-	bl_label = "Flip image"
+	bl_label = "Rotate image"
 	bl_options = {'REGISTER', 'UNDO'}
 	rotate_value = bpy.props.StringProperty()
 
@@ -196,10 +221,10 @@ def register():
 		description="Folder path",
 		default="")
 
-	bpy.types.Scene.IM_slide_show_speed = bpy.props.StringProperty(
+	bpy.types.Scene.im_slide_show_speed = bpy.props.IntProperty(
 		name="",
 		description="Slide Show Speed",
-		default="")
+		default=2)
 
 	bpy.utils.register_class(IM_Change_Image)
 	bpy.utils.register_class(IM_Flip_Image)
@@ -212,13 +237,13 @@ def unregister():
 	bpy.utils.unregister_class(Image_Manager_Panel)
 
 	del bpy.types.Scene.IM_folder_path
-	del bpy.types.Scene.IM_slide_show_speed
+	del bpy.types.Scene.im_slide_show_speed
 
 	bpy.utils.unregister_class(IM_Change_Image)
 	bpy.utils.unregister_class(IM_Flip_Image)
 	bpy.utils.unregister_class(IM_Rotate_Image)
 	bpy.utils.unregister_class(IM_Copy_Image_Path)
-	bpy.utils.register_class(IM_Slide_Show)
+	bpy.utils.unregister_class(IM_Slide_Show)
 
 
 if __name__ == "__main__":
