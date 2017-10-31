@@ -16,8 +16,18 @@ import subprocess
 # show the list of images on the right ?
 # change the tool name to image viewer
 
+# recursive ? 
 # filter images
 
+# map keys to move between prev and next images
+# show images name in the opengl ?
+# show  zoom percentage ?  
+
+# each image won't load into blender.
+# do a load option to actually load and keep it ?
+
+# remember the fit and zoom on each image ? 
+ 
 # metadata: a new panel to show meta of the current image
 # class Image_Manager_Metadata(bpy.types.Panel):
 # 	"""
@@ -27,6 +37,25 @@ import subprocess
 IMG_TRAY = []
 IMG_TRAY_POSITION = 0
 
+class Image_Info_Panel(bpy.types.Panel):
+    """ Show Image Info
+    """
+    bl_label = "Image Info"
+    bl_space_type = "IMAGE_EDITOR"
+    bl_region_type = "TOOLS"
+    
+    def draw(self, context):
+        layout = self.layout
+        column = layout.column(True)
+
+        # open
+        row = column.row(True)
+        # rename ? 
+        row.label('name')
+        row.label('constext.scene.IM_current_image_name')
+        row.label('size')
+        row.label()
+        
 
 class Image_Manager_Panel(bpy.types.Panel):
     """
@@ -80,8 +109,8 @@ class Image_Manager_Panel(bpy.types.Panel):
         row = column.row(True)
         row.operator("image.view_all",
                      text="Fit").fit_view = True
-        row.operator("image.view_zoom_ratio",
-                     text="All")
+        # row.operator("image.view_zoom_ratio",
+        #              text="All")
         row.operator("image.view_zoom_ratio",
                      text="Actual").ratio = 1
 
@@ -120,7 +149,7 @@ class Image_Manager_Panel(bpy.types.Panel):
         # slide show
         row = column.row(True)
         row.prop(context.scene,
-                 'im_slide_show_speed',
+                 'IM_slide_show_speed',
                  text="speed")
         row.operator('scene.im_slide_show',
                      text="",
@@ -139,6 +168,7 @@ class Image_Manager_Panel(bpy.types.Panel):
                      text="open in ps",
                      icon="OPEN_RECENT").app = 'ps'
 
+        
 
 class IM_Open_Image_External(bpy.types.Operator):
     """ Open image in external
@@ -209,9 +239,23 @@ def get_images(path):
     """
     return [img for img in os.listdir(path) if img.endswith('.png')]
 
+def get_next_element(array, index):
+    """ get the next element in the array
+    """
+    if( index == len(array) - 1):
+        return 0
+    return index + 1
+
+
+def get_prev_element(array, index):
+    """ get the prev element in the array
+    """
+    if( index == 0 ):
+        return len(array) - 1
+    return index-1
 
 class IM_Change_Image(bpy.types.Operator):
-    """ next image
+    """ Change current image
     """
     bl_idname = "scene.im_change_image"
     bl_label = "change current image"
@@ -230,12 +274,13 @@ class IM_Change_Image(bpy.types.Operator):
         # image_tray = context.scene.IM_Image_Tray
         # print(context.scene.IM_folder_path)
         if self.direction == 'left':
-            context.scene.IM_Image_Tray_Position -=  1
-            
-        if self.direction == 'right':
-            context.scene.IM_Image_Tray_Position += 1
+            context.scene.IM_Image_Tray_Position = get_prev_element(img_tray, context.scene.IM_Image_Tray_Position )
 
-        img_path = os.path.join(root_path, img_tray[context.scene.IM_Image_Tray_Position])
+        if self.direction == 'right':
+            context.scene.IM_Image_Tray_Position = get_next_element(img_tray, context.scene.IM_Image_Tray_Position )
+
+        img_path = os.path.join(
+            root_path, img_tray[context.scene.IM_Image_Tray_Position])
         # self.report( {'INFO'}, ' '.join(context.scene['IMG_TRAY'] ) )
         # self.report( {'INFO'}, img_path )
         # self.report( {'INFO'}, str( context.scene.IM_Image_Tray_Position ) )
@@ -243,11 +288,11 @@ class IM_Change_Image(bpy.types.Operator):
         if(os.path.exists(img_path)):
             # load the image
             new_image = bpy.data.images.load(img_path,
-                            check_existing = True)
+                                             check_existing=True)
             # set image as current image after loading...
             for area in bpy.context.screen.areas:
                 if area.type == 'IMAGE_EDITOR':
-                    area.spaces.active.image=new_image
+                    area.spaces.active.image = new_image
 
         return {'FINISHED'}
 
@@ -255,10 +300,10 @@ class IM_Change_Image(bpy.types.Operator):
 class IM_Flip_Image(bpy.types.Operator):
     """ Flip Image
     """
-    bl_idname="scene.im_flip_image"
-    bl_label="Flip image"
-    bl_options={'REGISTER', 'UNDO'}
-    flip_value=bpy.props.StringProperty()
+    bl_idname = "scene.im_flip_image"
+    bl_label = "Flip image"
+    bl_options = {'REGISTER', 'UNDO'}
+    flip_value = bpy.props.StringProperty()
 
     def execute(self, context):
         self.report({"INFO"}, "%s" % (self.flip_value))
@@ -268,10 +313,10 @@ class IM_Flip_Image(bpy.types.Operator):
 class IM_Rotate_Image(bpy.types.Operator):
     """ Flip Image
     """
-    bl_idname="scene.im_rotate_image"
-    bl_label="Rotate image"
-    bl_options={'REGISTER', 'UNDO'}
-    rotate_value=bpy.props.StringProperty()
+    bl_idname = "scene.im_rotate_image"
+    bl_label = "Rotate image"
+    bl_options = {'REGISTER', 'UNDO'}
+    rotate_value = bpy.props.StringProperty()
 
     def execute(self, context):
         self.report({"INFO"}, "%s" % (self.rotate_value))
@@ -279,17 +324,17 @@ class IM_Rotate_Image(bpy.types.Operator):
 
 
 def update_folder_path(self, context):
-    root_path=context.scene.IM_folder_path
+    root_path = context.scene.IM_folder_path
 
     # get all the images
-    context.scene['IM_Image_Tray']= get_images(root_path)
+    context.scene['IM_Image_Tray'] = get_images(root_path)
     # set the position to first image
     context.scene.IM_Image_Tray_Position = 0
 
-    # load the first image in the folder 
-    new_image=bpy.data.images.load(os.path.join(root_path, 
-                    context.scene['IM_Image_Tray'][0]),
-                    check_existing=True)
+    # load the first image in the folder
+    new_image = bpy.data.images.load(os.path.join(root_path,
+                                                  context.scene['IM_Image_Tray'][0]),
+                                     check_existing=True)
 
     # set image as current image after loading...
     for area in bpy.context.screen.areas:
@@ -320,14 +365,10 @@ def register():
         # get=get_folder_path,
         subtype='DIR_PATH')
 
-    bpy.types.Scene.im_slide_show_speed = bpy.props.IntProperty(
+    bpy.types.Scene.IM_slide_show_speed = bpy.props.IntProperty(
         name="",
         description="Slide Show Speed",
         default=2)
-    
-    # bpy.types.Scene.IM_Image_Tray = bpy.props.CollectionProperty(
-    # 	name=""
-    # )
 
     bpy.utils.register_class(IM_Change_Image)
     bpy.utils.register_class(IM_Flip_Image)
@@ -341,7 +382,7 @@ def unregister():
     bpy.utils.unregister_class(Image_Manager_Panel)
 
     del bpy.types.Scene.IM_folder_path
-    del bpy.types.Scene.im_slide_show_speed
+    del bpy.types.Scene.IM_slide_show_speed
     del bpy.types.Scene.IM_Image_Tray_Position
 
     bpy.utils.unregister_class(IM_Change_Image)
