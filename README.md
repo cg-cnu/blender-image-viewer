@@ -1,7 +1,7 @@
 <p align="center"> 
   <img src="https://user-images.githubusercontent.com/2767425/32134367-a2d8d898-bc09-11e7-80dc-35ee647feb82.png" />
-  <h1 align="center">Image Manager</h1>
-  <h4 align="center">Simple image manager in blender</h4>
+  <h1 align="center">Image Viewer</h1>
+  <h4 align="center">A simple image viewer in blender</h4>
   <br>
 </p>
 
@@ -10,7 +10,7 @@
 
 ## Issue/Feedback:
 
-log them in the [github issues](https://github.com/cg-cnu/blender-image-manager/issues) or hit me on [twitter](https://twitter.com/cgcnu).
+log them in the [github issues](https://github.com/cg-cnu/blender-image-viewer/issues) or hit me on [twitter](https://twitter.com/cgcnu).
 
 ## Inspiration:
 
