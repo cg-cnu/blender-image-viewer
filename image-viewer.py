@@ -1,10 +1,10 @@
 bl_info = {
-    "name": "Image Manager",
-    "description": "A simple image manager",
+    "name": "Image Viewer",
+    "description": "A simple image viewer",
     "author": "Sreenivas Alapati",
     "version": (0, 0, 1),
     "blender": (2, 7, 8),
-    "location": "UV/Image Editor > Toolshelf > Image Manager",
+    "location": "UV/Image Editor > Toolshelf > Image Viewer",
     "category": "Scene",
 }
 
@@ -40,7 +40,7 @@ IMG_TRAY_POSITION = 0
 class Image_Info_Panel(bpy.types.Panel):
     """ Show Image Info
     """
-    bl_label = "Image Info"
+    bl_label = "Image Info Panel"
     bl_space_type = "IMAGE_EDITOR"
     bl_region_type = "TOOLS"
     
@@ -57,11 +57,11 @@ class Image_Info_Panel(bpy.types.Panel):
         row.label()
         
 
-class Image_Manager_Panel(bpy.types.Panel):
+class Image_Viewer_Panel(bpy.types.Panel):
     """
      Resize Texutres
     """
-    bl_label = "Image Manager"
+    bl_label = "Image Viewer Panel"
     bl_space_type = "IMAGE_EDITOR"
     bl_region_type = "TOOLS"
 
@@ -351,7 +351,7 @@ def update_folder_path(self, context):
 
 
 def register():
-    bpy.utils.register_class(Image_Manager_Panel)
+    bpy.utils.register_class(Image_Viewer_Panel)
     # FIXME: noticed by admin @ 2017-10-30 14:03:20
     #  change the input to aboslute path on load
     # bpy.path.abspath(path)
@@ -379,7 +379,7 @@ def register():
 
 
 def unregister():
-    bpy.utils.unregister_class(Image_Manager_Panel)
+    bpy.utils.unregister_class(Image_Viewer_Panel)
 
     del bpy.types.Scene.IM_folder_path
     del bpy.types.Scene.IM_slide_show_speed
