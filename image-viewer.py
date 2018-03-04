@@ -12,6 +12,23 @@ import bpy
 import os
 import subprocess
 
+# custom icons
+import bpy.utils.previews
+# increase the button size ? 
+
+# icons_dict = bpy.utils.previews.new()
+# # this will work for addons 
+# icons_dir = os.path.join(os.path.dirname(__file__), "icons")
+# # but it won't give you usefull path when you opened a file in text editor and hit run.
+# # this will work in that case:
+# # script_path = bpy.context.space_data.text.filepath
+# # icons_dir = os.path.join(os.path.dirname(script_path), "icons")
+# icons_dict.load("right-arrow", os.path.join(icons_dir, "right-arrow.png"), 'IMAGE')
+# print (icons_dict)
+
+# icon_value=icons_dict["right-arrow"].icon_id
+# print (icons_dict["right-arrow"])
+# print (icons_dict["right-arrow"].icon_id)
 # IDEA: logged by admin @ 2017-10-28 14:53:07
 # show the list of images on the right ?
 # change the tool name to image viewer
@@ -55,11 +72,21 @@ class Image_Info_Panel(bpy.types.Panel):
         row.label('constext.scene.IM_current_image_name')
         row.label('size')
         row.label()
-        
+
+# preview_icons = bpy.utils.previews.new()
+
+# def icon_register(fileName):
+#     name = fileName.split('.')[0]   # Don't include file extension
+#     icons_dir = os.path.join(os.path.dirname(__file__), "icons")
+#     preview_icons.load(name, os.path.join(icons_dir, fileName), 'IMAGE')
+
+# icon_register('right-arrow.png')
+
+def get_icon(name):
+    return custom_icons[name].icon_id
 
 class Image_Viewer_Panel(bpy.types.Panel):
-    """
-     Resize Texutres
+    """ image viewer panel
     """
     bl_label = "Image Viewer Panel"
     bl_space_type = "IMAGE_EDITOR"
@@ -77,74 +104,82 @@ class Image_Viewer_Panel(bpy.types.Panel):
         # move
         row = column.row(True)
         op = row.operator("scene.im_change_image",
-                          text="",
-                          icon="TRIA_LEFT").direction = 'left'
-
+                          text=" ",
+                          icon_value=get_icon("direction_left")).direction = 'left'
+                
         op = row.operator("scene.im_change_image",
-                          text="",
-                          icon="TRIA_RIGHT").direction = 'right'
+                          text=" ",
+                          icon_value=get_icon("direction_right")).direction = 'right'
 
         # rotate
         row = column.row(True)
         op = row.operator("scene.im_rotate_image",
-                          text="L",
-                          icon="TRIA_LEFT").rotate_value = "rotate left"
+                          text=" ",
+                          icon_value=get_icon('rotate_left')).rotate_value = "rotate left"
 
         op = row.operator("scene.im_rotate_image",
-                          text='R',
-                          icon="TRIA_RIGHT").rotate_value = "rotate right"
+                          text=' ',
+                          icon_value=get_icon('rotate_right')).rotate_value = "rotate right"
 
         # flip
         row = column.row(True)
 
         op = row.operator("scene.im_flip_image",
-                          text='H',
-                          icon="TRIA_LEFT").flip_value = "flip left"
+                          text=' ',
+                          icon_value=get_icon('flip_horizontal')).flip_value = "flip horizontal"
 
         op = row.operator("scene.im_flip_image",
-                          text='V',
-                          icon="TRIA_RIGHT").flip_value = "flip right"
+                          text=' ',
+                          icon_value=get_icon('flip_vertical')).flip_value = "flip vertical"
 
         # view
         row = column.row(True)
         row.operator("image.view_all",
-                     text="Fit").fit_view = True
+                     text="Fit",
+                     icon_value=get_icon('view_fit')).fit_view = True
         # row.operator("image.view_zoom_ratio",
         #              text="All")
         row.operator("image.view_zoom_ratio",
-                     text="Actual").ratio = 1
+                     text="Actual",
+                     icon_value=get_icon('view_actual')).ratio = 1
 
         # zoom
         row = column.row(True)
         row.operator("image.view_zoom_out",
-                     text="",
-                     icon="ZOOM_OUT")
+                     text=" ",
+                     icon_value=get_icon('zoom_out'))
         row.operator("image.view_zoom_in",
-                     text="",
-                     icon="ZOOM_IN")
+                     text=" ",
+                     icon_value=get_icon('zoom_in'))
 
         # reload image
         row = column.row(True)
+        # TODO: created by salapati @ 2018-3-4 13:50:11
+        # active only if image is there...
         row.operator("image.reload",
-                     text="",
-                     icon="FILE_REFRESH")
+                     text=" ",
+                     icon_value=get_icon('reload'))
 
         # save/saveas
         row = column.row(True)
         row.operator('image.save',
                      text="save",
-                     icon="SAVE_AS")
-        row.operator('image.save',
-                     text="save all",
-                     icon="SAVE_AS")
+                     icon_value=get_icon('save'))
         row.operator('image.save_as',
                      text="save as",
-                     icon="SAVE_AS")
+                     icon_value=get_icon('save_as'))
 
         # copy path
+        # TODO: created by salapati @ 2018-3-4 13:50:25
+        # active only if image is there...
         row = column.row(True)
         row.operator('scene.im_copy_image_path',
-                     text="Copy Path")
+                     text="Path",
+                     icon_value=get_icon('copy_path'))
+
+        row.operator('scene.im_copy_image_path',
+                     text="Image",
+                     icon_value=get_icon('copy_image'))
 
         # slide show
         row = column.row(True)
@@ -160,13 +195,13 @@ class Image_Viewer_Panel(bpy.types.Panel):
         row.prop(context.user_preferences.themes[0].image_editor.space,
                  "back",
                  text="bg color")
-        # TODO: created by admin @ 2017-10-30 12:25:16
+        # TODO: created by salapati @ 2017-10-30 12:25:16
         # reset the value to the theme default
-
+        
         row = column.row(True)
         row.operator('scene.im_open_image_external',
-                     text="open in ps",
-                     icon="OPEN_RECENT").app = 'ps'
+                     text="",
+                     icon_value=get_icon('open_file_external')).app = 'ps'
 
         
 
@@ -201,20 +236,20 @@ class IM_Slide_Show(bpy.types.Operator):
         return {'FINISHED'}
 
 
-class IM_Save_All_Images(bpy.types.Operator):
-    """ Save all modified images
-    """
-    bl_idname = "scene.im_save_all_images"
-    bl_label = "Save all images"
-    bl_options = {'REGISTER', 'UNDO'}
+# class IM_Save_All_Images(bpy.types.Operator):
+#     """ Save all modified images
+#     """
+#     bl_idname = "scene.im_save_all_images"
+#     bl_label = "Save all images"
+#     bl_options = {'REGISTER', 'UNDO'}
 
-    def execute(self, context):
-        # get all the modified images
-        # then save them on to the original one by one
+#     def execute(self, context):
+#         # get all the modified images
+#         # then save them on to the original one by one
 
-        self.report({'INFO'}, ' Saved all the images.')
+#         self.report({'INFO'}, ' Saved all the images.')
 
-        return {'FINISHED'}
+#         return {'FINISHED'}
 
 
 class IM_Copy_Image_Path(bpy.types.Operator):
@@ -377,6 +412,17 @@ def register():
     bpy.utils.register_class(IM_Slide_Show)
     bpy.utils.register_class(IM_Open_Image_External)
 
+    global custom_icons
+    custom_icons = bpy.utils.previews.new()
+    # script_path = bpy.context.space_data.text.filepath
+    # icons_dir = os.path.join(os.path.dirname(__file__), "icons")
+    icons_dir = '/Users/salapati/Documents/codemonk/cg-cnu/addons/blender-image-viewer/icons'
+    # print ("icons_dir", icons_dir)
+    # get all the png files in the icons_dir
+    for icon in os.listdir(icons_dir):
+        name = icon.split('.')[0]
+        custom_icons.load(name, os.path.join(icons_dir, icon), 'IMAGE')
+    bpy.utils.register_module(__name__)
 
 def unregister():
     bpy.utils.unregister_class(Image_Viewer_Panel)
@@ -392,6 +438,13 @@ def unregister():
     bpy.utils.unregister_class(IM_Slide_Show)
     bpy.utils.unregister_class(IM_Open_Image_External)
 
+    global custom_icons
+    bpy.utils.previews.remove(custom_icons)
+    bpy.utils.unregister_module(__name__)
+
+    # bpy.utils.previews.remove(preview_icons)
+
+custom_icons = None
 
 if __name__ == "__main__":
     register()
