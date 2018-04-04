@@ -12,6 +12,9 @@ import bpy
 import os
 import subprocess
 
+# from bpy.types import Panel, EnumProperty, WindowManager
+# from bpy.props import StringProperty
+
 # custom icons
 import bpy.utils.previews
 # increase the button size ? 
@@ -57,10 +60,15 @@ IMG_TRAY_POSITION = 0
 class Image_Info_Panel(bpy.types.Panel):
     """ Show Image Info
     """
-    bl_label = "Image Info Panel"
+    bl_label = " "
     bl_space_type = "IMAGE_EDITOR"
     bl_region_type = "TOOLS"
-    
+    bl_category = "ImageViewer"
+
+    def draw_header(self, _):
+        layout = self.layout
+        layout.label(text= "current image" or "Image Info Panel" )
+
     def draw(self, context):
         layout = self.layout
         column = layout.column(True)
@@ -69,7 +77,6 @@ class Image_Info_Panel(bpy.types.Panel):
         row = column.row(True)
         # rename ? 
         row.label('name')
-        row.label('constext.scene.IM_current_image_name')
         row.label('size')
         row.label()
 
@@ -85,55 +92,144 @@ class Image_Info_Panel(bpy.types.Panel):
 def get_icon(name):
     return custom_icons[name].icon_id
 
+# def generate_previews():
+#     # We are accessing all of the information that we generated in the register function below
+#     preview_collection = preview_collections["thumbnail_previews"]
+#     image_location = preview_collection.images_location
+#     VALID_EXTENSIONS = ('.png', '.jpg', '.jpeg')
+    
+#     enum_items = []
+    
+#     # Generate the thumbnails
+#     for i, image in enumerate(os.listdir(image_location)):
+#         if image.endswith(VALID_EXTENSIONS):
+#             filepath = os.path.join(image_location, image)
+#             thumb = preview_collection.load(filepath, filepath, 'IMAGE')
+#             enum_items.append((image, image, "", thumb.icon_id, i))
+            
+#     return enum_items
+
+# class op_popup(bpy.types.Operator):
+#     # bl_idname = "ui.imageviewer_popup"
+#     bl_label = "Message"
+
+#     message = StringProperty()
+ 
+#     def execute(self, context):
+#         self.report({'INFO'}, self.message)
+#         print(self.message)
+#         return {'FINISHED'}
+ 
+#     def invoke(self, context, event):
+#         wm = context.window_manager
+#         return wm.invoke_popup(self, width=200, height=200)
+ 
+#     def draw(self, context):
+#         self.layout.label(self.message)
+
+
+
+# def register():
+#     from bpy.types import Scene
+#     from bpy.props import StringProperty, EnumProperty
+    
+#     print("_______REgister previews")
+
+#     # Operators
+#     # bpy.utils.register_class(op_popup)
+
+#     # global preview_icons
+#     # preview_icons = bpy.utils.previews.new()
+
+#     # Create a new preview collection (only upon register)
+#     preview_collection = bpy.utils.previews.new()
+#     preview_collection.images_location = os.path.join(os.path.dirname(__file__), "./icons")
+#     preview_collections["thumbnail_previews"] = preview_collection
+    
+#     # This is an EnumProperty to hold all of the images
+#     # You really can save it anywhere in bpy.types.*  Just make sure the location makes sense
+#     bpy.types.Scene.IM_image_previews = EnumProperty(
+#         items=generate_previews(),
+#     )
+    
+# def unregister():
+
+#     print("_______UNregister previews")
+
+#     from bpy.types import WindowManager
+#     for preview_collection in preview_collections.values():
+#         bpy.utils.previews.remove(preview_collection)
+#     preview_collections.clear()
+    
+
+#     # Unregister icons
+#     # global preview_icons
+#     bpy.utils.previews.remove(preview_icons)
+
+
+#     del bpy.types.Scene.IM_image_previews
+
+
 class Image_Viewer_Panel(bpy.types.Panel):
     """ image viewer panel
     """
     bl_label = "Image Viewer Panel"
     bl_space_type = "IMAGE_EDITOR"
     bl_region_type = "TOOLS"
+    bl_category = "ImageViewer"
 
     def draw(self, context):
         layout = self.layout
-        column = layout.column(True)
+        column = layout.column(align=True)
+
+        # if not context.scene.IM_folder_path:
+        #     column.enable = True
 
         # open
-        row = column.row(True)
+        row = column.row(align=True)
         row.prop(context.scene,
                  'IM_folder_path')
 
+        # column.template_icon_view(context.scene, "IM_image_previews")
+
+        # rename
+        row = column.row(align=True)
+        # op = row.label("{}".format())
+
         # move
-        row = column.row(True)
+        box = layout.box()
+
+        row = box.row(True)
         op = row.operator("scene.im_change_image",
-                          text=" ",
+                          text="Previous Image",
                           icon_value=get_icon("direction_left")).direction = 'left'
                 
         op = row.operator("scene.im_change_image",
-                          text=" ",
+                          text="Next Image",
                           icon_value=get_icon("direction_right")).direction = 'right'
 
         # rotate
-        row = column.row(True)
+        row = box.row(True)
         op = row.operator("scene.im_rotate_image",
-                          text=" ",
+                          text="Rotate Left",
                           icon_value=get_icon('rotate_left')).rotate_value = "rotate left"
 
         op = row.operator("scene.im_rotate_image",
-                          text=' ',
+                          text="Rotate right",
                           icon_value=get_icon('rotate_right')).rotate_value = "rotate right"
 
         # flip
-        row = column.row(True)
-
+        row = box.row(True)
         op = row.operator("scene.im_flip_image",
-                          text=' ',
+                          text='Flip Horizontal',
                           icon_value=get_icon('flip_horizontal')).flip_value = "flip horizontal"
 
         op = row.operator("scene.im_flip_image",
-                          text=' ',
+                          text='Flip Vertical',
                           icon_value=get_icon('flip_vertical')).flip_value = "flip vertical"
 
         # view
-        row = column.row(True)
+        row = box.row(True)
         row.operator("image.view_all",
                      text="Fit",
                      icon_value=get_icon('view_fit')).fit_view = True
@@ -144,7 +240,7 @@ class Image_Viewer_Panel(bpy.types.Panel):
                      icon_value=get_icon('view_actual')).ratio = 1
 
         # zoom
-        row = column.row(True)
+        row = box.row(True)
         row.operator("image.view_zoom_out",
                      text=" ",
                      icon_value=get_icon('zoom_out'))
@@ -152,16 +248,11 @@ class Image_Viewer_Panel(bpy.types.Panel):
                      text=" ",
                      icon_value=get_icon('zoom_in'))
 
-        # reload image
-        row = column.row(True)
-        # TODO: created by salapati @ 2018-3-4 13:50:11
-        # active only if image is there...
-        row.operator("image.reload",
-                     text=" ",
-                     icon_value=get_icon('reload'))
-
         # save/saveas
-        row = column.row(True)
+        row = box.row(True)
+        row.operator("image.reload",
+                     text="Reload",
+                     icon_value=get_icon('reload'))
         row.operator('image.save',
                      text="save",
                      icon_value=get_icon('save'))
@@ -172,7 +263,7 @@ class Image_Viewer_Panel(bpy.types.Panel):
         # copy path
         # TODO: created by salapati @ 2018-3-4 13:50:25
         # active only if image is there...
-        row = column.row(True)
+        row = box.row(True)
         row.operator('scene.im_copy_image_path',
                      text="Path",
                      icon_value=get_icon('copy_path'))
@@ -182,7 +273,7 @@ class Image_Viewer_Panel(bpy.types.Panel):
                      icon_value=get_icon('copy_image'))
 
         # slide show
-        row = column.row(True)
+        row = box.row(True)
         row.prop(context.scene,
                  'IM_slide_show_speed',
                  text="speed")
@@ -191,17 +282,20 @@ class Image_Viewer_Panel(bpy.types.Panel):
                      icon="PLAY")
 
         # background color
-        row = column.row(True)
+        row = box.row(True)
         row.prop(context.user_preferences.themes[0].image_editor.space,
                  "back",
                  text="bg color")
         # TODO: created by salapati @ 2017-10-30 12:25:16
         # reset the value to the theme default
         
-        row = column.row(True)
+        row = box.row(True)
         row.operator('scene.im_open_image_external',
                      text="",
                      icon_value=get_icon('open_file_external')).app = 'ps'
+
+        row = box.row(True)
+        row.operator("wm.url_open", text="", icon='INFO').url = "https://github.com/cg-cnu/blender-image-viewer/"
 
         
 
@@ -302,7 +396,7 @@ class IM_Change_Image(bpy.types.Operator):
         # set that image as the current image
         # get current image
         #
-        # self.report({'INFO'}, '{0} Image'.format(self.direction))
+        self.report({'INFO'}, '{0} Image'.format(self.direction))
         root_path = context.scene.IM_folder_path
         img_tray = context.scene['IM_Image_Tray']
         # img_position = context.scene.IM_Image_Tray_Position
@@ -310,7 +404,7 @@ class IM_Change_Image(bpy.types.Operator):
         # print(context.scene.IM_folder_path)
         if self.direction == 'left':
             context.scene.IM_Image_Tray_Position = get_prev_element(img_tray, context.scene.IM_Image_Tray_Position )
-
+        # print (self.direction)    
         if self.direction == 'right':
             context.scene.IM_Image_Tray_Position = get_next_element(img_tray, context.scene.IM_Image_Tray_Position )
 
@@ -320,8 +414,11 @@ class IM_Change_Image(bpy.types.Operator):
         # self.report( {'INFO'}, img_path )
         # self.report( {'INFO'}, str( context.scene.IM_Image_Tray_Position ) )
         # self.report( {'INFO'}, str( img_path ) )
+        print("img_path", img_path)
+        print("root_path", root_path)
         if(os.path.exists(img_path)):
             # load the image
+            print(img_path)
             new_image = bpy.data.images.load(img_path,
                                              check_existing=True)
             # set image as current image after loading...
