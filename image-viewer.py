@@ -182,19 +182,14 @@ class Image_Viewer_Panel(bpy.types.Panel):
         layout = self.layout
         column = layout.column(align=True)
 
-        # if not context.scene.IM_folder_path:
-        #     column.enable = True
-
         # open
         row = column.row(align=True)
         row.prop(context.scene,
                  'IM_folder_path')
 
-        # column.template_icon_view(context.scene, "IM_image_previews")
-
         # rename
         row = column.row(align=True)
-        # op = row.label("{}".format())
+        op = row.label("{}".format("current Image name"))
 
         # move
         box = layout.box()
@@ -242,10 +237,10 @@ class Image_Viewer_Panel(bpy.types.Panel):
         # zoom
         row = box.row(True)
         row.operator("image.view_zoom_out",
-                     text=" ",
+                     text="Zoom Out",
                      icon_value=get_icon('zoom_out'))
         row.operator("image.view_zoom_in",
-                     text=" ",
+                     text="Zoom In",
                      icon_value=get_icon('zoom_in'))
 
         # save/saveas
@@ -276,7 +271,7 @@ class Image_Viewer_Panel(bpy.types.Panel):
         row = box.row(True)
         row.prop(context.scene,
                  'IM_slide_show_speed',
-                 text="speed")
+                 text="Slide Show Speed")
         row.operator('scene.im_slide_show',
                      text="",
                      icon="PLAY")
@@ -285,17 +280,30 @@ class Image_Viewer_Panel(bpy.types.Panel):
         row = box.row(True)
         row.prop(context.user_preferences.themes[0].image_editor.space,
                  "back",
-                 text="bg color")
+                 text="Background Color")
+        row.operator('scene.im_reset_bg_color',
+                     text="",
+                     icon_value=get_icon('reload'))
+
         # TODO: created by salapati @ 2017-10-30 12:25:16
         # reset the value to the theme default
         
         row = box.row(True)
+        # make this a dropdown of applicaitons 
+        # which are linked to it;
+        size_dropdown = bpy.props.EnumProperty(
+            items = utilities_ui.size_textures,
+            name = "Texture Size",
+            update = on_dropdown_size, 
+            default = '512'
+        )
+
         row.operator('scene.im_open_image_external',
                      text="",
                      icon_value=get_icon('open_file_external')).app = 'ps'
 
         row = box.row(True)
-        row.operator("wm.url_open", text="", icon='INFO').url = "https://github.com/cg-cnu/blender-image-viewer/"
+        row.operator("wm.url_open", text="Source", icon='INFO').url = "https://github.com/cg-cnu/blender-image-viewer/"
 
         
 
@@ -443,7 +451,7 @@ class IM_Flip_Image(bpy.types.Operator):
 
 
 class IM_Rotate_Image(bpy.types.Operator):
-    """ Flip Image
+    """ Rotate Image
     """
     bl_idname = "scene.im_rotate_image"
     bl_label = "Rotate image"
