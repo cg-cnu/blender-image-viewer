@@ -196,6 +196,8 @@ class IMP_PT_image_viewer_panel(bpy.types.Panel):
         row.prop(context.scene, "IM_folder_path")
 
         # rename
+        # IDEA: Possible implementations -@salapati at 3/25/2019, 12:10:26 AM
+        # ability to rename ?
         row = column.row(align=True)
         row.label(text="{}".format(context.scene.IM_current_image_name))
 
@@ -209,7 +211,7 @@ class IMP_PT_image_viewer_panel(bpy.types.Panel):
             icon_value=get_icon("direction_left"),
         ).direction = "left"
 
-        op = row.operator(
+        row.operator(
             "scene.im_change_image",
             text="Next Image",
             icon_value=get_icon("direction_right"),
@@ -217,13 +219,13 @@ class IMP_PT_image_viewer_panel(bpy.types.Panel):
 
         # rotate
         row = box.row(align=True)
-        op = row.operator(
+        row.operator(
             "scene.im_rotate_image",
             text="Rotate Left",
             icon_value=get_icon("rotate_left"),
         ).rotate_value = "rotate left"
 
-        op = row.operator(
+        row.operator(
             "scene.im_rotate_image",
             text="Rotate right",
             icon_value=get_icon("rotate_right"),
@@ -231,13 +233,13 @@ class IMP_PT_image_viewer_panel(bpy.types.Panel):
 
         # flip
         row = box.row(align=True)
-        op = row.operator(
+        row.operator(
             "scene.im_flip_image",
             text="Flip Horizontal",
             icon_value=get_icon("flip_horizontal"),
         ).flip_value = "flip horizontal"
 
-        op = row.operator(
+        row.operator(
             "scene.im_flip_image",
             text="Flip Vertical",
             icon_value=get_icon("flip_vertical"),
