@@ -210,7 +210,6 @@ class IMP_PT_image_viewer_panel(bpy.types.Panel):
             text="Previous Image",
             icon_value=get_icon("direction_left"),
         ).direction = "left"
-
         row.operator(
             "scene.im_change_image",
             text="Next Image",
@@ -224,7 +223,6 @@ class IMP_PT_image_viewer_panel(bpy.types.Panel):
             text="Rotate Left",
             icon_value=get_icon("rotate_left"),
         ).rotate_value = "rotate left"
-
         row.operator(
             "scene.im_rotate_image",
             text="Rotate right",
@@ -237,13 +235,12 @@ class IMP_PT_image_viewer_panel(bpy.types.Panel):
             "scene.im_flip_image",
             text="Flip Horizontal",
             icon_value=get_icon("flip_horizontal"),
-        ).flip_value = "flip horizontal"
-
+        ).flip_value = "horizontal"
         row.operator(
             "scene.im_flip_image",
             text="Flip Vertical",
             icon_value=get_icon("flip_vertical"),
-        ).flip_value = "flip vertical"
+        ).flip_value = "vertical"
 
         # view
         row = box.row(align=True)
@@ -406,7 +403,11 @@ class IM_OT_copy_image_path(bpy.types.Operator):
 def get_images(path):
     """ get all the images in the given path
     """
-    return [img for img in os.listdir(path) if img.endswith(".png")]
+    # TODO: Tasks pending completion -@salapati at 3/25/2019, 11:26:35 PM
+    # multiple formats ; ability to filter ?
+    return [
+        img for img in os.listdir(path) if img.endswith(".png") or img.endswith(".jpg")
+    ]
 
 
 def get_next_element(array, index):
@@ -472,10 +473,53 @@ class IM_OT_flip_image(bpy.types.Operator):
     bl_idname = "scene.im_flip_image"
     bl_label = "Flip image"
     bl_options = {"REGISTER", "UNDO"}
-    flip_value: bpy.props.StringProperty()
+    flip_value = bpy.props.StringProperty()
 
     def execute(self, context):
-        self.report({"INFO"}, "%s" % (self.flip_value))
+        # https://blender.stackexchange.com/questions/3673/why-is-accessing-image-data-so-slow/3678#3678
+
+        if self.flip_value == "horizontal":
+            for area in bpy.context.screen.areas:
+                if area.type == "IMAGE_EDITOR":
+                    current_image = area.spaces.active.image
+            img = current_image
+            pixels = list(img.pixels)
+            width, height = img.size
+            # https://stackoverflow.com/questions/4647368/how-do-i-reverse-a-part-slice-of-a-list-in-python
+            # [item for i in range(0,len(l),len(l)/2) for item in l[i:i+len(l)/2][::-1]]
+            new_pixels = [
+                item
+                for i in range(0, len(pixels), 4)
+                for item in pixels[i : i + 4][::-1]
+            ]
+            new_pixels = [
+                item
+                for i in range(0, len(pixels), width * 4)
+                for item in new_pixels[i : i + width * 4][::-1]
+            ]
+
+            img.pixels[:] = new_pixels
+
+            self.report({"INFO"}, "%s" % (self.flip_value))
+        elif self.flip_value == "vertical":
+            for area in bpy.context.screen.areas:
+                if area.type == "IMAGE_EDITOR":
+                    current_image = area.spaces.active.image
+            img = current_image
+            pixels = list(img.pixels)
+            width, height = img.size
+            new_pixels = []
+            print(len(pixels))
+            # https://stackoverflow.com/questions/36189625/flip-a-pixel-array-horizontally
+            for i in range(0, len(pixels), width * 4):
+                row = pixels[i : i + width * 4]
+                new_pixels.insert(0, row)
+                # new_pixels[i] = pixels[i - 2 * (i % width) + width - 1]
+            print(len(new_pixels))
+            new_pixels = [item for sublist in new_pixels for item in sublist]
+            img.pixels[:] = new_pixels
+
+            self.report({"INFO"}, "%s" % (self.flip_value))
         return {"FINISHED"}
 
 
