@@ -477,16 +477,16 @@ class IM_OT_flip_image(bpy.types.Operator):
 
     def execute(self, context):
         # https://blender.stackexchange.com/questions/3673/why-is-accessing-image-data-so-slow/3678#3678
+        for area in bpy.context.screen.areas:
+            if area.type == "IMAGE_EDITOR":
+                current_image = area.spaces.active.image
+        img = current_image
+        pixels = list(img.pixels)
+        width = img.size[0]
 
         if self.flip_value == "horizontal":
-            for area in bpy.context.screen.areas:
-                if area.type == "IMAGE_EDITOR":
-                    current_image = area.spaces.active.image
-            img = current_image
-            pixels = list(img.pixels)
-            width, height = img.size
             # https://stackoverflow.com/questions/4647368/how-do-i-reverse-a-part-slice-of-a-list-in-python
-            # [item for i in range(0,len(l),len(l)/2) for item in l[i:i+len(l)/2][::-1]]
+
             new_pixels = [
                 item
                 for i in range(0, len(pixels), 4)
@@ -502,20 +502,11 @@ class IM_OT_flip_image(bpy.types.Operator):
 
             self.report({"INFO"}, "%s" % (self.flip_value))
         elif self.flip_value == "vertical":
-            for area in bpy.context.screen.areas:
-                if area.type == "IMAGE_EDITOR":
-                    current_image = area.spaces.active.image
-            img = current_image
-            pixels = list(img.pixels)
-            width, height = img.size
-            new_pixels = []
-            print(len(pixels))
             # https://stackoverflow.com/questions/36189625/flip-a-pixel-array-horizontally
+            new_pixels = []
             for i in range(0, len(pixels), width * 4):
                 row = pixels[i : i + width * 4]
                 new_pixels.insert(0, row)
-                # new_pixels[i] = pixels[i - 2 * (i % width) + width - 1]
-            print(len(new_pixels))
             new_pixels = [item for sublist in new_pixels for item in sublist]
             img.pixels[:] = new_pixels
 
