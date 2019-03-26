@@ -222,12 +222,12 @@ class IMP_PT_image_viewer_panel(bpy.types.Panel):
             "scene.im_rotate_image",
             text="Rotate Left",
             icon_value=get_icon("rotate_left"),
-        ).rotate_value = "rotate left"
+        ).rotate_value = "left"
         row.operator(
             "scene.im_rotate_image",
             text="Rotate right",
             icon_value=get_icon("rotate_right"),
-        ).rotate_value = "rotate right"
+        ).rotate_value = "right"
 
         # flip
         row = box.row(align=True)
@@ -521,10 +521,27 @@ class IM_OT_rotate_image(bpy.types.Operator):
     bl_idname = "scene.im_rotate_image"
     bl_label = "Rotate image"
     bl_options = {"REGISTER", "UNDO"}
-    rotate_value: bpy.props.StringProperty()
+    rotate_value = bpy.props.StringProperty()
 
     def execute(self, context):
-        self.report({"INFO"}, "%s" % (self.rotate_value))
+        for area in bpy.context.screen.areas:
+            if area.type == "IMAGE_EDITOR":
+                current_image = area.spaces.active.image
+        img = current_image
+        pixels = list(img.pixels)
+        width = img.size[0]
+        if self.rotate_value == "left":
+            from PIL import Image
+
+            image = Image.open("chip.png")
+            rotated_image = image.rotate(-90)
+            # rotated_image.save()
+            # rotated_image.show()
+
+            self.report({"INFO"}, "%s" % (self.rotate_value))
+        elif self.rotate_value == "right":
+            self.report({"INFO"}, "%s" % (self.rotate_value))
+
         return {"FINISHED"}
 
 
@@ -547,7 +564,9 @@ def update_folder_path(self, context):
     new_image = bpy.data.images.load(
         os.path.join(root_path, context.scene["IM_Image_Tray"][0]), check_existing=True
     )
-
+    # https://blender.stackexchange.com/questions/43345/i-cant-load-an-image-from-a-script
+    # possible replacement ?
+    # https://meshlogic.github.io/posts/blender/addons/extra-image-list/
     # set image as current image after loading...
     for area in bpy.context.screen.areas:
         if area.type == "IMAGE_EDITOR":
